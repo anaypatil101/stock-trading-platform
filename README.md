@@ -10,7 +10,7 @@ A full-stack stock trading web application that allows users to simulate buying 
 - 📊 Real-time stock listings and price updates
 - 💼 Portfolio management with buy/sell functionality
 - 🧾 Transaction history tracking
-- 📱 Responsive UI using Bootstrap 5
+- 📱 Clean UI using Bootstrap 5
 - 🌐 RESTful APIs for trading logic and user data
 
 ---
