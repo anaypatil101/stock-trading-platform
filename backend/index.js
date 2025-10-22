@@ -1,217 +1,272 @@
-require("dotenv").config();
-
-const express = require("express");
-const mongoose = require("mongoose");
-const bodyParser = require("body-parser");
-const cors = require("cors");
-
-const { HoldingsModel } = require("./model/HoldingsModel");
-
-const { PositionsModel } = require("./model/PositionsModel");
-const { OrdersModel } = require("./model/OrdersModel");
-
-const PORT = process.env.PORT || 3002;
-const uri = process.env.MONGO_URL;
-
+require('dotenv').config();
+const express = require('express');
 const app = express();
+const mongoose = require('mongoose');
+
+const { HoldingsModel } = require('./models/HoldingsModel.js');
+const {HoldingsData} = require('./init/HoldingsData.js');
+const {PositionsData} = require("./init/PositionsData.js");
+const {PositionModel} = require('./models/PositionsModel.js');
+const {WatchListData} = require('./init/WatchListData.js');
+const {WatchlistModel} = require('./models/WatchlistModel.js');
+const {OrdersModel} = require('./models/OrdersModel.js')
+
+const bodyParser  = require('body-parser')
+const cors = require('cors');
+const {fundsModel} = require('./models/FundsModel.js');
+
+const cookieParser = require("cookie-parser");
+const authRoute = require("./Routes/AuthRoute");
 
 app.use(cors());
 app.use(bodyParser.json());
 
-// app.get("/addHoldings", async (req, res) => {
-//   let tempHoldings = [
-//     {
-//       name: "BHARTIARTL",
-//       qty: 2,
-//       avg: 538.05,
-//       price: 541.15,
-//       net: "+0.58%",
-//       day: "+2.99%",
-//     },
-//     {
-//       name: "HDFCBANK",
-//       qty: 2,
-//       avg: 1383.4,
-//       price: 1522.35,
-//       net: "+10.04%",
-//       day: "+0.11%",
-//     },
-//     {
-//       name: "HINDUNILVR",
-//       qty: 1,
-//       avg: 2335.85,
-//       price: 2417.4,
-//       net: "+3.49%",
-//       day: "+0.21%",
-//     },
-//     {
-//       name: "INFY",
-//       qty: 1,
-//       avg: 1350.5,
-//       price: 1555.45,
-//       net: "+15.18%",
-//       day: "-1.60%",
-//       isLoss: true,
-//     },
-//     {
-//       name: "ITC",
-//       qty: 5,
-//       avg: 202.0,
-//       price: 207.9,
-//       net: "+2.92%",
-//       day: "+0.80%",
-//     },
-//     {
-//       name: "KPITTECH",
-//       qty: 5,
-//       avg: 250.3,
-//       price: 266.45,
-//       net: "+6.45%",
-//       day: "+3.54%",
-//     },
-//     {
-//       name: "M&M",
-//       qty: 2,
-//       avg: 809.9,
-//       price: 779.8,
-//       net: "-3.72%",
-//       day: "-0.01%",
-//       isLoss: true,
-//     },
-//     {
-//       name: "RELIANCE",
-//       qty: 1,
-//       avg: 2193.7,
-//       price: 2112.4,
-//       net: "-3.71%",
-//       day: "+1.44%",
-//     },
-//     {
-//       name: "SBIN",
-//       qty: 4,
-//       avg: 324.35,
-//       price: 430.2,
-//       net: "+32.63%",
-//       day: "-0.34%",
-//       isLoss: true,
-//     },
-//     {
-//       name: "SGBMAY29",
-//       qty: 2,
-//       avg: 4727.0,
-//       price: 4719.0,
-//       net: "-0.17%",
-//       day: "+0.15%",
-//     },
-//     {
-//       name: "TATAPOWER",
-//       qty: 5,
-//       avg: 104.2,
-//       price: 124.15,
-//       net: "+19.15%",
-//       day: "-0.24%",
-//       isLoss: true,
-//     },
-//     {
-//       name: "TCS",
-//       qty: 1,
-//       avg: 3041.7,
-//       price: 3194.8,
-//       net: "+5.03%",
-//       day: "-0.25%",
-//       isLoss: true,
-//     },
-//     {
-//       name: "WIPRO",
-//       qty: 4,
-//       avg: 489.3,
-//       price: 577.75,
-//       net: "+18.08%",
-//       day: "+0.32%",
-//     },
-//   ];
+app.use(cookieParser());
+app.use(express.json());
 
-//   tempHoldings.forEach((item) => {
-//     let newHolding = new HoldingsModel({
-//       name: item.name,
-//       qty: item.qty,
-//       avg: item.avg,
-//       price: item.price,
-//       net: item.day,
-//       day: item.day,
-//     });
 
-//     newHolding.save();
-//   });
-//   res.send("Done!");
-// });
+const port = process.env.PORT || 8080;
 
-// app.get("/addPositions", async (req, res) => {
-//   let tempPositions = [
-//     {
-//       product: "CNC",
-//       name: "EVEREADY",
-//       qty: 2,
-//       avg: 316.27,
-//       price: 312.35,
-//       net: "+0.58%",
-//       day: "-1.24%",
-//       isLoss: true,
-//     },
-//     {
-//       product: "CNC",
-//       name: "JUBLFOOD",
-//       qty: 1,
-//       avg: 3124.75,
-//       price: 3082.65,
-//       net: "+10.04%",
-//       day: "-1.35%",
-//       isLoss: true,
-//     },
-//   ];
 
-//   tempPositions.forEach((item) => {
-//     let newPosition = new PositionsModel({
-//       product: item.product,
-//       name: item.name,
-//       qty: item.qty,
-//       avg: item.avg,
-//       price: item.price,
-//       net: item.net,
-//       day: item.day,
-//       isLoss: item.isLoss,
-//     });
+mongoose.connect("mongodb://127.0.0.1:27017/kite");
+// app.use("/", authRoute);
 
-//     newPosition.save();
-//   });
-//   res.send("Done!");
-// });
+app.get("/addWatchList",async(req,res)=>{
+    await WatchlistModel.deleteMany();
+    WatchListData.forEach(async(stock)=>{
+        let newData = new WatchlistModel(stock);
+        let result = await newData.save();
+        console.log(result);
+    })
+    res.send("Data Added Successfully");
+})
 
-app.get("/allHoldings", async (req, res) => {
-  let allHoldings = await HoldingsModel.find({});
-  res.json(allHoldings);
-});
+app.get("/addPositions",async(req,res)=>{
+    await PositionModel.deleteMany();
+    PositionsData.forEach(async(stock)=>{
+        let newData = new PositionModel(stock);
+        let res = await newData.save();
+        console.log(res);
+    })
+    res.send("Data Added Successfully");
+})
 
-app.get("/allPositions", async (req, res) => {
-  let allPositions = await PositionsModel.find({});
-  res.json(allPositions);
-});
 
-app.post("/newOrder", async (req, res) => {
-  let newOrder = new OrdersModel({
-    name: req.body.name,
-    qty: req.body.qty,
-    price: req.body.price,
-    mode: req.body.mode,
-  });
+app.get("/addHoldings", async (req, res) => {
+    await HoldingsModel.deleteMany();
+    HoldingsData.forEach(async (currItem) => {
+        let newHolding = new HoldingsModel({
+            name: currItem.name,
+            qty: currItem.qty,
+            avg: currItem.avg,
+            price: currItem.price,
+            net: currItem.net,
+            day: currItem.day
+        });
+        console.log(newHolding);
+        await newHolding.save();
+    })
+    res.send("Data Inserted successfully")
+})
 
-  newOrder.save();
 
-  res.send("Order saved!");
-});
+app.get("/addOrders",async(req,res)=>{
+    let deleteResult = await OrdersModel.deleteMany();
+    let placedOrders = [
+        {
+            orderType: "BUY",
+            stockName: "INFY",
+            AveragePrice: 20,
+            qty: 10,
+        },
+        {
+            orderType: "SELL",
+            stockName: "INFY",
+            AveragePrice: 20,
+            qty: 10
+        }
+    ]
 
-app.listen(PORT, () => {
-  console.log("App started!");
-  mongoose.connect(uri);
-  console.log("DB started!");
-});
+   let insertResult =  await OrdersModel.insertMany(placedOrders);
+   console.log(insertResult);
+    res.send("Working properly")
+})
+
+app.post("/addWatchList",async(req,res)=>{
+    let data = req.body;
+    for(let i = 0; i < data.length; i++){
+        let watchListStock = new WatchlistModel({"stockName":data[i].stockSymbol})
+        let result = await watchListStock.save();
+        console.log(result);
+    }
+    res.send("Data Inserted Successfully");
+})
+
+
+
+
+
+// WORKING ROUTES
+app.get("/allHoldings",async(req,res)=>{
+    let allHoldings = await HoldingsModel.find({});
+    res.json(allHoldings);
+})
+
+app.get("/allPositions",async(req,res)=>{
+    let allPositions = await PositionModel.find({});
+    res.json(allPositions);
+
+})
+
+
+app.get("/allOrders",async(req,res)=>{
+   let fetechResult = await OrdersModel.find();
+    res.send(fetechResult);
+})
+
+app.post("/placeBuyOrder",async(req,res)=>{
+    let data = new OrdersModel(req.body);
+    let saveResult = await data.save();
+
+    //Insert into Holdings
+    let holdingsStock = await HoldingsModel.findOne({"name":req.body.stockName});
+    if(holdingsStock)
+    {
+        let deleteResult = await HoldingsModel.deleteOne({"name":req.body.stockName});
+        console.log
+        let newData =  new HoldingsModel({
+            name:holdingsStock.name,
+            price:req.body.AveragePrice,
+            qty: Number(Number(holdingsStock.qty) + Number(req.body.qty)),
+            avg: req.body.AveragePrice,
+            net:"+0.58%",
+            day:"+0.11%"
+        });
+        await newData.save();
+    }
+    else
+    {
+        let newData =  new HoldingsModel({
+            name:req.body.stockName,
+            price:req.body.AveragePrice,
+            qty: req.body.qty, // Ensure this.qty and req.body.qty are numbers
+            avg: req.body.AveragePrice,
+            net:"+0.58%",
+            day:"+0.11%"
+        });
+        await newData.save();
+    }
+
+    //Update Funds
+    let currFunds = await fundsModel.find({});
+    currFunds = Number(currFunds[0].fundsAvilable);
+    let newFunds = Math.floor(currFunds - (req.body.qty * req.body.AveragePrice));
+    let deleteFunds = await fundsModel.deleteMany({});
+    let addNewFunds = new fundsModel({"fundsAvilable":newFunds});
+    await addNewFunds.save();
+    res.send(saveResult);
+})
+
+app.get("/getFunds",async(req,res)=>{
+    let currentFunds = await fundsModel.findOne({});
+    res.send(currentFunds);
+})
+
+app.post("/addFunds",async(req,res)=>{
+    let fundsToadd = req.body.funds;
+    fundsToadd = Number(fundsToadd)
+    let currentFunds = await fundsModel.findOne({});
+    if(currentFunds){   
+        currentFunds = Number(currentFunds.fundsAvilable);
+        currentFunds += fundsToadd;
+        let deleteResult = await fundsModel.deleteMany({});
+        let insertData = new fundsModel({fundsAvilable:currentFunds});
+        await insertData.save();
+    }else{
+        let deleteResult = await fundsModel.deleteMany({});
+        let insertData = new fundsModel({fundsAvilable:fundsToadd});
+        let insertResult = await insertData.save();
+    }
+    res.send("Successfully Added Funds");
+})
+
+
+app.get("/getWatchlist",async(req,res)=>{
+    let result = await WatchlistModel.find({});
+    res.send(result);
+})
+
+app.post("/updateHoldings",async(req,res)=>{
+    let data = req.body;
+    let stockDocument = await HoldingsModel.findOneAndUpdate({"name":data.name},{$set:{"price":data.price,"net":data.net}});
+    res.send("Holdings Updated Successfully");
+})
+
+
+app.post("/addNewWatchListStock",async(req,res)=>{
+     let newStockSymbol = req.body;
+     console.log(newStockSymbol);
+     let newWacthListStock = new WatchlistModel(newStockSymbol);
+     let result = await newWacthListStock.save();
+     res.send(result);
+})
+
+app.post("/deleteStock",async(req,res)=>{
+    let deleteStock = req.body;
+    let deleteResult = await WatchlistModel.findOneAndDelete(deleteStock);
+    console.log(deleteResult);
+    res.send(deleteResult);
+})
+
+app.post("/getAvilableQty",async(req,res)=>{
+    let stockName = req.body;
+    let data = await HoldingsModel.findOne({"name":req.body.name});
+    res.send(data);
+})
+
+app.post("/placeSellOrder",async(req,res)=>{
+    let data = new OrdersModel(req.body);
+    let saveResult = await data.save();
+
+    //Insert into Holdings
+    let holdingsStock = await HoldingsModel.findOne({"name":req.body.stockName});
+    if(holdingsStock)
+    {
+        let deleteResult = await HoldingsModel.deleteOne({"name":req.body.stockName});
+        console.log
+        let newData =  new HoldingsModel({
+            name:holdingsStock.name,
+            price:req.body.AveragePrice,
+            qty: Number(Number(holdingsStock.qty) - Number(req.body.qty)),
+            avg: req.body.AveragePrice,
+            net:"+0.58%",
+            day:"+0.11%"
+        });
+        await newData.save();
+    }
+    else
+    {
+        let newData =  new HoldingsModel({
+            name:req.body.stockName,
+            price:req.body.AveragePrice,
+            qty: req.body.qty, // Ensure this.qty and req.body.qty are numbers
+            avg: req.body.AveragePrice,
+            net:"+0.58%",
+            day:"+0.11%"
+        });
+        await newData.save();
+    }
+
+    //Update Funds
+    let currFunds = await fundsModel.find({});
+    currFunds = Number(currFunds[0].fundsAvilable);
+    let newFunds = Math.floor(currFunds + (req.body.qty * req.body.AveragePrice));
+    let deleteFunds = await fundsModel.deleteMany({});
+    let addNewFunds = new fundsModel({"fundsAvilable":newFunds});
+    await addNewFunds.save();
+    res.send(saveResult);
+})
+
+app.listen(port, () => {
+    console.log(`App Started on Server = ${port}`);
+})
